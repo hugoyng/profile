@@ -123,6 +123,9 @@ body:has(.pswp--open) { overflow: hidden; }
 .button span, .text-button span { transition: transform .22s ease; }
 .button:hover { background: var(--accent-dark); }
 .button:hover span, .text-button:hover span { transform: translateX(3px); }
+.button-secondary { background: var(--ivory); color: var(--accent-dark); box-shadow: inset 0 0 0 1px var(--line); }
+.button-secondary:hover { background: var(--tint); }
+.button-secondary:hover span { transform: translateY(2px); }
 .hero-actions .text-button { margin-top: 0; }
 
 .skills-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .82rem; }

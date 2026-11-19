@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="EchoDesk case study by Hugo Yeung, with the architecture and web interface of a Chinese speech transcription service.">
+  <meta name="theme-color" content="#f7f3ea">
+  <title>EchoDesk · Hugo Yeung</title>
+  <link rel="stylesheet" href="vendor/photoswipe/photoswipe.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="case-study.css">
+  <script src="vendor/photoswipe/photoswipe.umd.min.js" defer></script>
+  <script src="lightbox.js" defer></script>
+</head>
+<body class="case-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="site-content">
+    <header class="case-masthead">
+      <div class="shell">
+        <a class="case-brand" href="index.html">Hugo Yeung</a>
+        <a class="text-button case-back" href="index.html#project-echodesk"><span aria-hidden="true">←</span> Showcase</a>
+      </div>
+    </header>
+
+    <main class="shell" id="main">
+      <header class="case-hero">
+        <div>
+          <h1>EchoDesk</h1>
+          <p class="case-deck">Chinese speech transcription with speaker diarization.</p>
+          <p class="case-intro">EchoDesk turns an audio recording into a timestamped transcript grouped by speaker. Teams can use the CLI or submit jobs to a FastAPI service and review the results in a browser. Optional AI post-processing adds role labels, a summary and follow-up actions.</p>
+          <div class="case-actions">
+            <a class="button" href="https://github.com/hugoyng/echo-desk">View on GitHub <span aria-hidden="true">↗</span></a>
+            <a class="text-button" href="#architecture">Explore architecture <span aria-hidden="true">↓</span></a>
+          </div>
+        </div>
+        <figure class="case-hero-image">
+          <a class="image-zoom" href="images/echodesk/transcript.webp" aria-label="Enlarge the EchoDesk transcript cover screenshot">
+            <img src="images/echodesk/transcript.webp" width="1440" height="960" alt="EchoDesk task dashboard and transcript drawer showing timestamped dialogue with speaker labels." fetchpriority="high">
+          </a>
+          <figcaption>Transcript review · Local Docker demo</figcaption>
+        </figure>
+      </header>
+
+      <section class="case-section" aria-labelledby="role-title">
+        <h2 id="role-title">My Role</h2>
+        <p class="case-intro"><strong>Solo Developer</strong></p>
+        <p class="case-intro">I built EchoDesk’s transcription pipeline, API, task queue, and browser interface. I designed the local mode to transcribe Chinese speech and identify who spoke when on a standard CPU-only computer, so users can process recordings on their own hardware without a dedicated GPU.</p>
+      </section>
+
+      <section class="case-section" aria-labelledby="highlights-title">
+        <h2 id="highlights-title">What EchoDesk does</h2>
+        <div class="case-features">
+          <article>
+            <h3>Who spoke and when</h3>
+            <p>Voice activity detection finds speech, SenseVoice transcribes it, and CAM++ speaker embeddings help group the timestamped segments by speaker.</p>
+          </article>
+          <article>
+            <h3>Local and hosted processing</h3>
+            <p>FunASR can run entirely locally. Optional post-processing can use a local llama.cpp model or OpenRouter, which also provides a direct multimodal transcription mode.</p>
+          </article>
+          <article>
+            <h3>Jobs survive restarts</h3>
+            <p>SQLite stores job state so pending jobs and expired in-progress jobs can be recovered. Webhook retries run separately from transcription workers.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="case-section" id="architecture" aria-labelledby="architecture-title">
+        <h2 id="architecture-title">Architecture</h2>
+        <p class="case-intro">The API accepts an audio upload or URL, queues the job, and sends it to the selected transcription pipeline.</p>
+        <figure class="case-system" aria-labelledby="architecture-caption">
+          <div class="system-inputs system-sources">
+            <div><strong>Audio upload</strong><small>Multipart upload from the Web UI or API</small></div>
+            <div><strong>Audio URL</strong><small>API submission with streaming download</small></div>
+          </div>
+          <div class="system-arrow" aria-hidden="true">↓</div>
+          <div class="system-inputs system-api">
+            <div><strong>FastAPI task API</strong><small>Accepts jobs and exposes their status and results</small></div>
+          </div>
+          <div class="system-arrow" aria-hidden="true">↓</div>
+          <div class="system-server">
+            <h3>Persistent task queue</h3>
+            <p>SQLite stores job state while workers handle transcription with a concurrency limit.</p>
+            <div class="system-inputs system-branches">
+              <div><strong>FunASR</strong><small>Local speech recognition and speaker diarization, followed by AI post-processing.</small></div>
+              <div><strong>FunASR Raw</strong><small>Local speech recognition and speaker diarization with timestamped segments.</small></div>
+              <div><strong>AI Direct</strong><small>OpenRouter multimodal model transcribes the audio, labels speakers and summarizes the conversation.</small></div>
+            </div>
+            <p class="system-recovery"><strong>Job recovery</strong> Resume queued work and reclaim in-progress jobs after their leases expire.</p>
+          </div>
+          <div class="system-arrow" aria-hidden="true">↓</div>
+          <div class="system-outputs">
+            <div><strong>Transcript</strong><small>Timestamped dialogue with speaker labels</small></div>
+            <div><strong>Analysis</strong><small>Role labels, summary and follow-up actions in AI modes</small></div>
+            <div><strong>Webhook delivery</strong><small>Optional completion callback with persistent retries</small></div>
+          </div>
+          <figcaption id="architecture-caption">How the API accepts audio, routes it to one of three transcription pipelines and returns the result.</figcaption>
+        </figure>
+      </section>
+
+      <section class="case-section" id="screenshots" aria-labelledby="screenshots-title">
+        <h2 id="screenshots-title">Inside EchoDesk</h2>
+        <p class="case-intro">Screenshots from the local Docker demo using synthesized Mandarin dialogue. Select an image to enlarge it.</p>
+        <div class="case-screens">
+          <figure>
+            <a class="image-zoom" href="images/echodesk/tasks.webp" aria-label="Enlarge the EchoDesk task submission screenshot">
+              <img src="images/echodesk/tasks.webp" width="1440" height="960" loading="lazy" alt="EchoDesk dashboard with the New Task form for audio uploads, URLs, transcription mode and callbacks.">
+            </a>
+            <figcaption>
+              <h3>Task submission</h3>
+              <p>Submit a recording, track the job’s status and review callback delivery from the same workspace.</p>
+            </figcaption>
+          </figure>
+          <figure>
+            <a class="image-zoom" href="images/echodesk/transcript.webp" aria-label="Enlarge the EchoDesk transcript screenshot">
+              <img src="images/echodesk/transcript.webp" width="1440" height="960" loading="lazy" alt="EchoDesk transcript drawer with color-coded speaker labels and timestamped Mandarin dialogue.">
+            </a>
+            <figcaption>
+              <h3>Speaker-labelled transcript</h3>
+              <p>The result drawer shows when each speaker talks. The transcript is also available to download.</p>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+
+    <footer class="case-footer">
+      <div class="shell">
+        <a class="text-button case-back" href="index.html#project-echodesk"><span aria-hidden="true">←</span> Back to Showcase</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

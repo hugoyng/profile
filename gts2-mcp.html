@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hugo Yeung’s Trading Operations Assistant case study, featuring plain-language data queries, manager approvals and session audit.">
+  <meta name="theme-color" content="#f7f3ea">
+  <title>Trading Operations Assistant · Hugo Yeung</title>
+  <link rel="stylesheet" href="vendor/photoswipe/photoswipe.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="case-study.css">
+  <script src="vendor/photoswipe/photoswipe.umd.min.js" defer></script>
+  <script src="lightbox.js" defer></script>
+</head>
+<body class="case-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="site-content">
+    <header class="case-masthead">
+      <div class="shell">
+        <a class="case-brand" href="index.html">Hugo Yeung</a>
+        <a class="text-button case-back" href="index.html#project-gts2-mcp"><span aria-hidden="true">←</span> Showcase</a>
+      </div>
+    </header>
+
+    <main class="shell" id="main">
+      <header class="case-hero">
+        <div>
+          <h1>Trading Operations Assistant</h1>
+          <p class="case-deck">Plain-language analysis of brokerage trading data.</p>
+          <p class="case-intro">GTS2 is a trading platform that manages brokerage accounts, orders and positions. The GTS2 MCP server connects it to an AI assistant so managers can ask questions in chat, inspect the query and review proposed changes.</p>
+          <div class="case-actions">
+            <a class="button" href="#screenshots">See the query demo <span aria-hidden="true">↓</span></a>
+            <a class="text-button" href="#architecture">Explore architecture <span aria-hidden="true">↓</span></a>
+          </div>
+        </div>
+        <figure class="case-hero-image">
+          <a class="image-zoom" href="images/gts2-mcp/query.webp" aria-label="Enlarge the trading data query screenshot">
+            <img src="images/gts2-mcp/query.webp" width="1440" height="960" alt="Ops Chat shows a question about open positions, the visible SQL query step, a ranked table and a summary." fetchpriority="high">
+          </a>
+          <figcaption>Open positions by instrument · Local demo with synthetic data</figcaption>
+        </figure>
+      </header>
+
+      <section class="case-section" aria-labelledby="role-title">
+        <h2 id="role-title">My Role</h2>
+        <p class="case-intro"><strong>Solo Developer</strong></p>
+        <p class="case-intro">I built both the MCP server that connects to the brokerage platform and the chat interface managers use. I designed the assistant to answer read-only questions directly and pause for human approval before applying a proposed change.</p>
+      </section>
+
+      <section class="case-section" aria-labelledby="highlights-title">
+        <h2 id="highlights-title">What the assistant does</h2>
+        <div class="case-features">
+          <article>
+            <h3>Answers trading data questions</h3>
+            <p>The assistant can join, filter and summarize synchronized trading records through a read-only SQL tool. Each call respects the manager’s trading group and company permissions.</p>
+          </article>
+          <article>
+            <h3>Human approval for changes</h3>
+            <p>Write tools are opt-in and permission-gated. In Ops Chat, the agent pauses and shows the proposed change. The operator approves or rejects it, and the app processes that decision only once.</p>
+          </article>
+          <article>
+            <h3>Traceable operations</h3>
+            <p>Ops Chat records approval requests, decisions and execution outcomes. PostgreSQL persists the conversation and paused run so reviewers can follow what happened.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="case-section" id="architecture" aria-labelledby="architecture-title">
+        <h2 id="architecture-title">Architecture</h2>
+        <p class="case-intro">FastMCP serves tools over Streamable HTTP. The server resolves the manager identity and checks permissions before dispatching requests to the read store or the GTS2 gateway.</p>
+        <figure class="case-system" aria-labelledby="architecture-caption">
+          <div class="system-inputs system-sources">
+            <div><strong>Ops Chat</strong><small>React and ChatKit → agent → human approval for proposed writes</small></div>
+            <div><strong>Other MCP clients</strong><small>Tool discovery, schema resources and structured requests</small></div>
+          </div>
+          <div class="system-arrow" aria-hidden="true">↓</div>
+          <div class="system-server">
+            <h3>Python / FastMCP</h3>
+            <p>Resolves the manager identity, checks tool rights and data scope, and records redacted audit events.</p>
+            <div class="system-inputs system-sources system-branches">
+              <div><strong>Read path</strong><small>Record lookups and bounded, read-only SQL over SQLite views.</small></div>
+              <div><strong>Write path</strong><small>Opt-in tools validate changes and send them through the TCP / Protobuf gateway.</small></div>
+            </div>
+          </div>
+          <div class="system-arrow" aria-hidden="true">↓</div>
+          <div class="system-outputs system-sources">
+            <div><strong>Synchronized SQLite store</strong><small>Reference and trading records arrive from the GTS2 main and trade servers.</small></div>
+            <div><strong>Trading platform access server</strong><small>The GTS2 gateway submits permitted changes and returns their outcomes.</small></div>
+          </div>
+          <figcaption id="architecture-caption">The MCP service separates reads from writes. Ops Chat stores its approval runs and session history in PostgreSQL.</figcaption>
+        </figure>
+      </section>
+
+      <section class="case-section" id="screenshots" aria-labelledby="screenshots-title">
+        <h2 id="screenshots-title">Inside Ops Chat</h2>
+        <p class="case-intro">These screenshots show the local Ops Chat interface with synthetic records. Select an image to enlarge it.</p>
+        <figure class="case-query-demo">
+          <a class="image-zoom" href="images/gts2-mcp/query.webp" aria-label="Enlarge the position analysis screenshot">
+            <img src="images/gts2-mcp/query.webp" width="1440" height="960" loading="lazy" alt="Plain-language question and read-only query step, followed by a table of four instruments ranked by open positions and a short analysis.">
+          </a>
+          <figcaption>
+            <h3>Find which instruments have the most open positions</h3>
+            <p>The demo asks for position and account counts for one trading group. EURUSD ranks first with 18 of the group’s 40 open positions across nine accounts.</p>
+            <p>The chat replays a prepared example using results from a read-only query on synthetic data.</p>
+          </figcaption>
+        </figure>
+        <div class="case-screens">
+          <figure>
+            <a class="image-zoom" href="images/gts2-mcp/approval.webp" aria-label="Enlarge the Ops Chat approval screenshot">
+              <img src="images/gts2-mcp/approval.webp" width="1440" height="960" loading="lazy" alt="Ops Chat approval card for a proposed early close, with a readable change summary and decision buttons.">
+            </a>
+            <figcaption>
+              <h3>Approval in chat</h3>
+              <p>Review the proposed trading session hours and the underlying request before making a decision.</p>
+            </figcaption>
+          </figure>
+          <figure>
+            <a class="image-zoom" href="images/gts2-mcp/audit.webp" aria-label="Enlarge the Ops Chat session audit screenshot">
+              <img src="images/gts2-mcp/audit.webp" width="1440" height="1389" loading="lazy" alt="Ops Chat Admin session audit showing the conversation and a rejected write run.">
+            </a>
+            <figcaption>
+              <h3>Session audit</h3>
+              <p>The session audit links the proposed change to the conversation and records the rejection and its outcome.</p>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+
+    <footer class="case-footer">
+      <div class="shell">
+        <a class="text-button case-back" href="index.html#project-gts2-mcp"><span aria-hidden="true">←</span> Back to Showcase</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
